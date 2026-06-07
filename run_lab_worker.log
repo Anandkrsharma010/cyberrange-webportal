@@ -1,0 +1,10 @@
+{"message": "Lab provisioning worker process starting.", "timestamp": "2026-05-24T00:21:17.%fZ", "level": "INFO", "logger": "run_lab_worker"}
+{"message": "Lab provisioning worker started (poll_interval=5s)", "timestamp": "2026-05-24T00:21:17.%fZ", "level": "INFO", "logger": "lab_worker"}
+{"message": "[WORKER LOOP ERROR] the database system is shutting down", "timestamp": "2026-05-24T04:57:14.%fZ", "level": "ERROR", "logger": "lab_worker"}
+{"message": "[WORKER LOOP ERROR] [Errno 111] Connect call failed ('127.0.0.1', 5432)", "timestamp": "2026-05-24T04:57:23.%fZ", "level": "ERROR", "logger": "lab_worker"}
+{"message": "[WORKER LOOP ERROR] [Errno 111] Connect call failed ('127.0.0.1', 5432)", "timestamp": "2026-05-24T04:57:31.%fZ", "level": "ERROR", "logger": "lab_worker"}
+{"message": "Shutdown signal received \u2014 stopping lab worker gracefully.", "timestamp": "2026-05-24T04:57:33.%fZ", "level": "INFO", "logger": "run_lab_worker"}
+{"message": "Stop event set \u2014 giving worker up to 60s to finish current Terraform job...", "timestamp": "2026-05-24T04:57:33.%fZ", "level": "INFO", "logger": "run_lab_worker"}
+{"message": "Stop event set \u2014 exiting provisioning worker loop.", "timestamp": "2026-05-24T04:57:36.%fZ", "level": "INFO", "logger": "lab_worker"}
+{"message": "Lab provisioning worker finished cleanly within grace period.", "timestamp": "2026-05-24T04:57:36.%fZ", "level": "INFO", "logger": "run_lab_worker"}
+{"message": "Lab provisioning worker shut down cleanly.", "timestamp": "2026-05-24T04:57:36.%fZ", "level": "INFO", "logger": "run_lab_worker"}

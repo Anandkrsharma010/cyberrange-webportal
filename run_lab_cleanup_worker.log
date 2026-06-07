@@ -1,0 +1,9 @@
+{"message": "Lab cleanup worker process starting.", "timestamp": "2026-05-24T00:21:17.%fZ", "level": "INFO", "logger": "run_lab_cleanup_worker"}
+{"message": "Lab cleanup worker started (poll_interval=10s)", "timestamp": "2026-05-24T00:21:17.%fZ", "level": "INFO", "logger": "lab_cleanup_worker"}
+{"message": "[CLEANUP LOOP ERROR] the database system is shutting down", "timestamp": "2026-05-24T04:57:15.%fZ", "level": "ERROR", "logger": "lab_cleanup_worker"}
+{"message": "[CLEANUP LOOP ERROR] [Errno 111] Connect call failed ('127.0.0.1', 5432)", "timestamp": "2026-05-24T04:57:28.%fZ", "level": "ERROR", "logger": "lab_cleanup_worker"}
+{"message": "Shutdown signal received \u2014 stopping cleanup worker gracefully.", "timestamp": "2026-05-24T04:57:33.%fZ", "level": "INFO", "logger": "run_lab_cleanup_worker"}
+{"message": "Stop event set \u2014 giving cleanup worker up to 120s to finish current Terraform destroy...", "timestamp": "2026-05-24T04:57:33.%fZ", "level": "INFO", "logger": "run_lab_cleanup_worker"}
+{"message": "Stop event set \u2014 exiting cleanup worker loop.", "timestamp": "2026-05-24T04:57:38.%fZ", "level": "INFO", "logger": "lab_cleanup_worker"}
+{"message": "Lab cleanup worker finished cleanly within grace period.", "timestamp": "2026-05-24T04:57:38.%fZ", "level": "INFO", "logger": "run_lab_cleanup_worker"}
+{"message": "Lab cleanup worker shut down cleanly.", "timestamp": "2026-05-24T04:57:38.%fZ", "level": "INFO", "logger": "run_lab_cleanup_worker"}

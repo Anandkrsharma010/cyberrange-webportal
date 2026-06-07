@@ -1,0 +1,233 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: oklch(0.577 0.245 27.325);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.708 0 0);
+  --chart-1: oklch(0.646 0.222 41.116);
+  --chart-2: oklch(0.6 0.118 184.704);
+  --chart-3: oklch(0.398 0.07 227.392);
+  --chart-4: oklch(0.828 0.189 84.429);
+  --chart-5: oklch(0.769 0.188 70.08);
+  --radius: 0.625rem;
+  --sidebar: oklch(0.985 0 0);
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.145 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.145 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.985 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.396 0.141 25.723);
+  --destructive-foreground: oklch(0.637 0.237 25.331);
+  --border: oklch(0.269 0 0);
+  --input: oklch(0.269 0 0);
+  --ring: oklch(0.439 0 0);
+  --chart-1: oklch(0.488 0.243 264.376);
+  --chart-2: oklch(0.696 0.17 162.48);
+  --chart-3: oklch(0.769 0.188 70.08);
+  --chart-4: oklch(0.627 0.265 303.9);
+  --chart-5: oklch(0.645 0.246 16.439);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(0.269 0 0);
+  --sidebar-ring: oklch(0.439 0 0);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  /* Use a clean UI-friendly system sans stack and slightly larger base text for readability */
+  body {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    @apply bg-background text-foreground text-base leading-relaxed;
+  }
+
+  /* Headings: consistent sizes, weight and tighter rhythm */
+  h1 { @apply text-4xl md:text-5xl font-extrabold leading-tight mb-4; }
+  h2 { @apply text-2xl md:text-3xl font-semibold leading-snug mb-3; }
+  h3 { @apply text-xl font-semibold mb-2; }
+  h4 { @apply text-lg font-medium mb-2; }
+}
+
+/* Form typography & spacing - unified across embedded forms and dialogs */
+@layer components {
+  /* Labels */
+  .form-label, label {
+    @apply block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1 leading-5;
+  }
+
+  /* Inputs / selects / textareas - consistent size and spacing */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  textarea,
+  select,
+  .form-input,
+  .form-select,
+  .form-textarea {
+    /* Slightly taller inputs, softer radius and clearer text */
+    @apply block w-full px-3 py-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-white dark:bg-[color:var(--card)] text-sm md:text-base text-gray-900 dark:text-gray-100 leading-6 placeholder:text-blue-100 focus:(outline-none ring-2 ring-blue-500 border-blue-500) transition-shadow;
+  }
+
+  textarea, .form-textarea {
+    @apply min-h-[80px] md:min-h-[100px] resize-vertical;
+  }
+
+  /* Form row layout helpers */
+  .form-row {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-4 items-start mb-4;
+  }
+
+  .form-row--single {
+    @apply grid grid-cols-1 gap-4 mb-4;
+  }
+
+  /* Actions inside forms (submit/cancel) */
+  .form-actions {
+    @apply flex items-center justify-end gap-3 mt-4;
+  }
+
+  .form-actions button, input[type="submit"], button[type="submit"] {
+    @apply px-4 py-2 text-sm font-semibold rounded-lg;
+  }
+
+  /* Compact spacing for form helpers/helptext */
+  .form-help {
+    @apply text-xs text-gray-500 mt-1;
+  }
+
+  /* Dialog content - narrow paragraphs and improved readability */
+  .dialog-content-wrapper p,
+  .dialog-content-wrapper label {
+    @apply text-sm leading-6 text-gray-700 dark:text-gray-200;
+  }
+}
+
+  /* Non-Tailwind header overrides: provide clean padding, radii and layout
+     using standard CSS so header visuals differ from default tailwind spacing. */
+  .site-header {
+    background: var(--color-card);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .header-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px; /* controlled via CSS not Tailwind */
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .logo-link { display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .logo-image { width:40px; height:40px; }
+  .logo-title { font-size:18px; font-weight:700; margin:0; color:var(--color-foreground); }
+  .logo-sub { font-size:12px; margin:0; color:var(--color-muted-foreground); }
+  .header-nav { display:flex; gap:20px; align-items:center; }
+  .nav-link { color:var(--color-muted-foreground); text-decoration:none; font-weight:600; display:flex; align-items:center; gap:6px; padding:6px 8px; border-radius:8px; }
+  .nav-link:hover { color:var(--color-primary); }
+  .nav-link.active { color:oklch(0.93 0.03 265.21); background: transparent; }
+  .nav-icon { width:16px; height:16px; }
+  .header-right { display:flex; align-items:center; gap:12px; }
+  .auth-buttons > * { margin-left:8px; }
+  .inline-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; padding:8px 0 6px 0; }
+  .inline-center { text-align:center; flex:1; }
+  .inline-title { font-size:20px; margin:6px 0 0 0; font-weight:600; }
+  .inline-sub { font-size:13px; margin:4px 0 0 0; color:var(--color-muted-foreground); }
+  .inline-left, .inline-right { flex:0 0 auto; }
+
+  /* avatar button small tweaks */
+  .avatar-button { border-radius:9999px; padding:6px; }
+  .avatar-img { width:40px; height:40px; }
+  .user-dropdown { min-width:200px; }
+
+  /* Reduce some card paddings to match tighter rhythm */
+  .card-tight { padding:12px; }

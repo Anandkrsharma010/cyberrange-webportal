@@ -1,0 +1,1124 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ===================================
+   RangeOps / portal dark theme
+   =================================== */
+
+:root {
+  /* Professional Dark Theme Palette */
+  --cyber-dark-bg: #0f1117;
+  --cyber-darker-bg: #0a0c10;
+  --cyber-card-bg: #1a1d27;
+  --cyber-elevated-bg: #22262f;
+
+  --cyber-blue-primary: #10b981;
+  --cyber-blue-secondary: #34d399;
+  --cyber-blue-dark: #059669;
+  --cyber-blue-glow: rgba(16, 185, 129, 0.1);
+
+  --cyber-purple: #8b5cf6;
+  --cyber-purple-light: #a78bfa;
+  --cyber-green: #10b981;
+  --cyber-green-light: #34d399;
+  --cyber-orange: #f59e0b;
+  --cyber-red: #ef4444;
+
+  --cyber-text-primary: #e5e7eb;
+  --cyber-text-secondary: #9ca3af;
+  --cyber-text-muted: #6b7280;
+
+  --cyber-border: #2a2d37;
+  --cyber-border-light: #3a3f4b;
+  --cyber-border-focus: #10b981;
+
+  /* Shadcn variables — dark-first */
+  --background: #0f1117;
+  --foreground: #e5e7eb;
+  --card: #1a1d27;
+  --card-foreground: #e5e7eb;
+  --popover: #1a1d27;
+  --popover-foreground: #e5e7eb;
+  --primary: #10b981;
+  --primary-foreground: #ffffff;
+  --secondary: #22262f;
+  --secondary-foreground: #e5e7eb;
+  --muted: #22262f;
+  --muted-foreground: #9ca3af;
+  --accent: #22262f;
+  --accent-foreground: #e5e7eb;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #2a2d37;
+  --input: #2a2d37;
+  --ring: #10b981;
+  --chart-1: #10b981;
+  --chart-2: #3b82f6;
+  --chart-3: #8b5cf6;
+  --chart-4: #f59e0b;
+  --chart-5: #ef4444;
+  --radius: 0.625rem;
+  --sidebar: #0a0c10;
+  --sidebar-foreground: #e5e7eb;
+  --sidebar-primary: #10b981;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1a1d27;
+  --sidebar-accent-foreground: #e5e7eb;
+  --sidebar-border: #2a2d37;
+  --sidebar-ring: #10b981;
+
+  /* Design System Variables */
+  --spacing-xs: 0.5rem;
+  --spacing-sm: 0.75rem;
+  --spacing-md: 1rem;
+  --spacing-lg: 1.5rem;
+  --spacing-xl: 2rem;
+  --spacing-2xl: 3rem;
+
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.5);
+  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 15px var(--cyber-blue-glow);
+
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.dark {
+  --background: #0f1117;
+  --foreground: #e5e7eb;
+  --card: #1a1d27;
+  --card-foreground: #e5e7eb;
+  --popover: #1a1d27;
+  --popover-foreground: #e5e7eb;
+  --primary: #10b981;
+  --primary-foreground: #ffffff;
+  --secondary: #22262f;
+  --secondary-foreground: #e5e7eb;
+  --muted: #22262f;
+  --muted-foreground: #9ca3af;
+  --accent: #22262f;
+  --accent-foreground: #e5e7eb;
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+  --border: #2a2d37;
+  --input: #2a2d37;
+  --ring: #10b981;
+  --chart-1: #10b981;
+  --chart-2: #3b82f6;
+  --chart-3: #8b5cf6;
+  --chart-4: #f59e0b;
+  --chart-5: #ef4444;
+  --sidebar: #0a0c10;
+  --sidebar-foreground: #e5e7eb;
+  --sidebar-primary: #10b981;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1a1d27;
+  --sidebar-accent-foreground: #e5e7eb;
+  --sidebar-border: #2a2d37;
+  --sidebar-ring: #10b981;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* ===================================
+   CYBER ADMIN PANEL STYLES
+   =================================== */
+
+/* Reset and Base Styles */
+/*
+  Note: previously this file used a universal reset that set padding:0 on *.
+  That unintentionally overrode directional padding utilities (e.g. Tailwind's pl-2)
+  because the shorthand `padding: 0` resets padding-left/padding-right etc. and
+  appeared later in the cascade. To preserve Tailwind utility behaviors and any
+  inline padding, switch to a box-sizing-only universal rule and apply margin
+  resets only to common block elements. This keeps utility classes like `pl-2`
+  functional.
+*/
+*, *::before, *::after {
+  box-sizing: border-box;
+  
+
+}
+html, div {
+  color: var(--cyber-text-primary);
+}
+
+/* reset margins for common block-level elements but keep padding intact so
+   directional padding utilities (pl- / pr- / pt- / pb-) are not overwritten */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+ol, ul, li, fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td {
+  /* margin: 0; */
+  /* color : white; */
+
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Inter', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+    margin : auto;
+    background: var(--cyber-dark-bg);
+
+}
+
+.common-background {
+  background-color: var(--cyber-dark-bg);
+}
+/* Admin Layout */
+.admin-layout {
+  min-height: 100vh;
+  background: var(--cyber-dark-bg);
+  display: flex;
+}
+
+option, select {
+   -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  background-color: #0a0e27;
+}
+
+/* Cyber Sidebar */
+.cyber-sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 280px;
+  background: linear-gradient(180deg, var(--cyber-card-bg) 0%, var(--cyber-darker-bg) 100%);
+  border-right: 1px solid var(--cyber-border);
+  display: flex;
+  flex-direction: column;
+  z-index: 100;
+  transition: width var(--transition-base);
+}
+
+.cyber-sidebar.collapsed {
+  width: 80px;
+}
+
+/* Sidebar Header */
+.sidebar-header {
+  padding: var(--spacing-xl) var(--spacing-lg);
+  border-bottom: 1px solid var(--cyber-border);
+  background: var(--cyber-elevated-bg);
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform var(--transition-fast);
+}
+
+.sidebar-logo:hover {
+  transform: translateX(2px);
+}
+
+.logo-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(135deg, var(--cyber-blue-primary) 0%, var(--cyber-blue-secondary) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: white;
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+  flex-shrink: 0;
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.logo-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--cyber-text-primary);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.logo-subtitle {
+  font-size: 0.75rem;
+  color: var(--cyber-text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.cyber-sidebar.collapsed .logo-text {
+  display: none;
+}
+
+/* Sidebar Navigation */
+.sidebar-nav {
+  flex: 1;
+  padding: var(--spacing-lg);
+  overflow-y: auto;
+}
+
+.nav-section {
+  margin-bottom: var(--spacing-xl);
+}
+
+.nav-section-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--cyber-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: var(--spacing-sm);
+  padding: 0 var(--spacing-md);
+}
+
+.cyber-sidebar.collapsed .nav-section-title {
+  display: none;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md) var(--spacing-md);
+  margin-bottom: var(--spacing-xs);
+  border-radius: var(--radius-md);
+  color: var(--cyber-text-secondary);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.9375rem;
+  transition: all var(--transition-fast);
+  position: relative;
+  overflow: hidden;
+}
+
+.nav-link::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--cyber-blue-primary);
+  transform: scaleY(0);
+  transition: transform var(--transition-fast);
+}
+
+.nav-link:hover {
+  color: var(--cyber-text-primary);
+  background: rgba(0, 212, 255, 0.08);
+  transform: translateX(2px);
+}
+
+.nav-link.active {
+  color: var(--cyber-blue-primary);
+  background: var(--cyber-blue-glow);
+}
+
+.nav-link.active::before {
+  transform: scaleY(1);
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+.nav-label {
+  white-space: nowrap;
+}
+
+.cyber-sidebar.collapsed .nav-label {
+  display: none;
+}
+
+.cyber-sidebar.collapsed .nav-link {
+  justify-content: center;
+}
+
+/* Sidebar Footer */
+.sidebar-footer {
+  padding: var(--spacing-lg);
+  border-top: 1px solid var(--cyber-border);
+  background: var(--cyber-elevated-bg);
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: rgba(0, 212, 255, 0.05);
+  margin-bottom: var(--spacing-md);
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--cyber-blue-primary), var(--cyber-purple));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: white;
+  flex-shrink: 0;
+}
+
+.user-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.user-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--cyber-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  font-size: 0.75rem;
+  color: var(--cyber-text-muted);
+}
+
+.cyber-sidebar.collapsed .user-info {
+  display: none;
+}
+
+/* Main Content Area */
+.admin-main {
+  flex: 1;
+  margin-left: 280px;
+  padding: var(--spacing-xl);
+  transition: margin-left var(--transition-base);
+  min-height: 100vh;
+}
+
+.cyber-sidebar.collapsed ~ .admin-main {
+  margin-left: 80px;
+}
+
+/* Page Header */
+.page-header {
+  margin-bottom: var(--spacing-2xl);
+}
+
+.page-title {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--cyber-text-primary);
+  margin-bottom: var(--spacing-xs);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+
+.page-description {
+  font-size: 1rem;
+  color: var(--cyber-text-secondary);
+  line-height: 1.5;
+}
+
+/* Cyber Cards */
+.cyber-card {
+  background: var(--cyber-card-bg);
+  border: 1px solid var(--cyber-border);
+  border-radius: var(--radius-lg);
+  padding: 15px;
+  box-shadow: var(--shadow-md);
+  transition: all var(--transition-fast);
+}
+
+.cyber-card:hover {
+  border-color: var(--cyber-border-light);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.cyber-card.glow {
+  border-color: var(--cyber-blue-primary);
+  box-shadow: var(--shadow-glow);
+}
+
+.card-header {
+  margin-bottom: var(--spacing-lg);
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--cyber-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.card-description {
+  font-size: 0.875rem;
+  color: var(--cyber-text-secondary);
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-2xl);
+}
+
+.stat-card {
+  background: var(--cyber-card-bg);
+  border: 1px solid var(--cyber-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  position: relative;
+  overflow: hidden;
+  transition: all var(--transition-fast);
+}
+
+.stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent-color), transparent);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.stat-card:hover::before {
+  opacity: 1;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--accent-color);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.stat-card.blue { --accent-color: var(--cyber-blue-primary); }
+.stat-card.green { --accent-color: var(--cyber-green); }
+.stat-card.purple { --accent-color: var(--cyber-purple); }
+.stat-card.orange { --accent-color: var(--cyber-orange); }
+
+.stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-md);
+}
+
+.stat-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--cyber-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.stat-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  background: rgba(0, 212, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent-color);
+}
+
+.stat-value {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--cyber-text-primary);
+  line-height: 1;
+  margin-bottom: var(--spacing-xs);
+}
+
+.stat-description {
+  font-size: 0.875rem;
+  color: var(--cyber-text-muted);
+}
+
+/* Buttons */
+.cyber-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: 0.875rem;
+  border: none;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  text-decoration: none;
+}
+
+.cyber-btn-primary {
+  background: linear-gradient(135deg, var(--cyber-blue-primary), var(--cyber-blue-secondary));
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 212, 255, 0.3);
+}
+
+.cyber-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 212, 255, 0.4);
+}
+
+.cyber-btn-secondary {
+  background: var(--cyber-elevated-bg);
+  color: var(--cyber-text-primary);
+  border: 1px solid var(--cyber-border-light);
+}
+
+.cyber-btn-secondary:hover {
+  border-color: var(--cyber-blue-primary);
+  color: var(--cyber-blue-primary);
+}
+
+/* Quick Actions Grid */
+.quick-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.action-card {
+  background: var(--cyber-card-bg);
+  border: 1px solid var(--cyber-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  text-align: center;
+  text-decoration: none;
+  transition: all var(--transition-fast);
+  cursor: pointer;
+}
+
+.action-card:hover {
+  border-color: var(--cyber-blue-primary);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+}
+
+.action-icon {
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--spacing-md);
+  border-radius: var(--radius-md);
+  background: rgba(0, 212, 255, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--cyber-blue-primary);
+}
+
+.action-card:hover .action-icon {
+  background: rgba(0, 212, 255, 0.2);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+}
+
+.action-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--cyber-text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.action-description {
+  font-size: 0.875rem;
+  color: var(--cyber-text-secondary);
+  line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .cyber-sidebar {
+    transform: translateX(-100%);
+  }
+  
+  .cyber-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+  
+  .admin-main {
+    margin-left: 0;
+  }
+  
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Non-Tailwind header overrides: ensure header visuals are present even if Tailwind processing
+   isn't run at lint-time. These rules are intentionally plain CSS and mirror the styles in
+   frontend/styles/globals.css so the shared Header component always has the expected layout. */
+.site-header {
+  background: var(--cyber-darker-bg);
+  border-bottom: 1px solid var(--cyber-border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  color: var(--cyber-text-primary);
+}
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+}
+.header-left { display: flex; align-items: center; gap: 12px; }
+.logo-link { display:flex; align-items:center; gap:10px; text-decoration:none; }
+.logo-image { width:40px; height:40px; }
+.logo-title { font-size:18px; font-weight:700; margin:0; color:var(--color-foreground); }
+.logo-sub { font-size:12px; margin:0; color:var(--color-muted-foreground); }
+.header-nav { display:flex; gap:20px; align-items:center; }
+.nav-link { color:var(--cyber-text-secondary); text-decoration:none; font-weight:600; display:flex; align-items:center; gap:6px; padding:6px 8px; border-radius:8px; }
+.nav-link:hover { color:var(--cyber-text-primary); }
+.nav-link.active { color:var(--cyber-blue-primary); background:transparent; }
+.nav-icon { width:16px; height:16px; }
+.header-right { display:flex; align-items:center; gap:12px; }
+.auth-buttons > * { margin-left:8px; }
+.inline-header { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; padding:8px 0 6px 0; }
+.inline-center { text-align:center; flex:1; }
+.inline-title { font-size:20px; margin:6px 0 0 0; font-weight:600; }
+.inline-sub { font-size:13px; margin:4px 0 0 0; color:var(--color-muted-foreground); }
+.inline-left, .inline-right { flex:0 0 auto; }
+.avatar-button { border-radius:9999px; padding:6px; }
+.avatar-img { width:40px; height:40px; }
+.user-dropdown { min-width:200px; }
+.card-tight { padding:12px; }
+
+/* Scrollbar Styling for Cyber Theme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--cyber-darker-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--cyber-border-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--cyber-blue-primary);
+}
+
+/* Loading Spinner */
+.cyber-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid var(--cyber-border);
+  border-top-color: var(--cyber-blue-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Utility Classes */
+.text-gradient {
+  background: linear-gradient(135deg, var(--cyber-blue-primary), var(--cyber-purple));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.glow-text {
+  text-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+}
+
+/* Override any dark text colors for admin pages */
+.admin-layout * {
+  /* intentionally left blank removed to avoid empty ruleset lint errors */
+}
+
+.admin-layout h1,
+.admin-layout h2,
+.admin-layout h3,
+.admin-layout h4,
+.admin-layout h5,
+.admin-layout h6 {
+  color: var(--cyber-text-primary);
+}
+
+.admin-layout p {
+  color: var(--cyber-text-secondary);
+}
+
+.admin-layout a {
+  color: var(--cyber-blue-primary);
+  text-decoration: none;
+}
+
+.admin-layout a:hover {
+  color: var(--cyber-blue-secondary);
+}
+
+/* Ensure form inputs are visible */
+.admin-layout input,
+.admin-layout textarea,
+.admin-layout select {
+  background: var(--cyber-elevated-bg);
+  border: 1px solid var(--cyber-border);
+  color: var(--cyber-text-primary);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.admin-layout input:focus,
+.admin-layout textarea:focus,
+.admin-layout select:focus {
+  outline: none;
+  border-color: var(--cyber-blue-primary);
+  box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.1);
+}
+
+.admin-layout input::placeholder,
+.admin-layout textarea::placeholder {
+  color: var(--cyber-text-muted);
+}
+
+/* Dialog/Modal overrides for cyber theme */
+.admin-layout [role="dialog"],
+.admin-layout .dialog-content {
+  background: var(--cyber-card-bg);
+  border: 1px solid var(--cyber-border);
+  color: var(--cyber-text-primary);
+}
+
+/* Table styling for admin */
+.admin-layout table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.admin-layout th {
+  background: var(--cyber-elevated-bg);
+  color: var(--cyber-text-primary);
+  font-weight: 600;
+  padding: var(--spacing-md);
+  text-align: left;
+  border-bottom: 2px solid var(--cyber-border-light);
+}
+
+.admin-layout td {
+  padding: var(--spacing-md);
+  border-bottom: 1px solid var(--cyber-border);
+  color: var(--cyber-text-secondary);
+}
+
+.admin-layout tr:hover {
+  background: rgba(0, 212, 255, 0.05);
+}
+
+/* Badge styling */
+.admin-layout .badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.75rem;
+  font-weight: 600;
+  background: var(--cyber-elevated-bg);
+  color: var(--cyber-text-primary);
+  border: 1px solid var(--cyber-border);
+}
+
+/* ======================================================
+   Tailwind utility class overrides for Admin Dark Theme
+   Map common light-mode utility classes to cyber theme vars
+   so pages using Tailwind utilities remain readable.
+   Scoped under .admin-layout to avoid global side-effects.
+   ====================================================== */
+.admin-layout .text-gray-900,
+.admin-layout .text-gray-800 {
+  color: var(--cyber-text-primary) !important;
+}
+
+.admin-layout .text-gray-700,
+.admin-layout .text-gray-600 {
+  color: var(--cyber-text-secondary) !important;
+}
+
+.admin-layout .text-gray-500,
+.admin-layout .text-gray-400 {
+  color: var(--cyber-text-muted) !important;
+}
+
+.admin-layout .text-blue-600,
+.admin-layout .text-blue-700,
+.admin-layout .text-blue-500 {
+  color: var(--cyber-blue-primary) !important;
+}
+
+.admin-layout .text-green-800 {
+  color: var(--cyber-green) !important;
+}
+
+.admin-layout .bg-white,
+.admin-layout .bg-gray-50,
+.admin-layout .bg-gray-100 {
+  background: var(--cyber-card-bg) !important;
+  border-color: var(--cyber-border) !important;
+  box-shadow: none !important;
+}
+
+.admin-layout .bg-blue-100 {
+  background: rgba(0,212,255,0.06) !important;
+  color: var(--cyber-blue-dark) !important;
+  border: 1px solid var(--cyber-border) !important;
+}
+
+.admin-layout .bg-green-100 {
+  background: rgba(16,185,129,0.06) !important;
+  color: var(--cyber-green) !important;
+  border: 1px solid var(--cyber-border) !important;
+}
+
+.admin-layout .border-gray-100,
+.admin-layout .border-gray-200 {
+  border-color: var(--cyber-border) !important;
+}
+
+.admin-layout .px-2.px-2,
+.admin-layout .px-2,
+.admin-layout .py-1 {
+  /* keep spacing utilities as-is; ensure text color is visible */
+  /* color: inherit !important; */
+}
+
+/* utility for inline code or mono font areas */
+.admin-layout .font-mono,
+.admin-layout code,
+.admin-layout pre {
+  background: rgba(0,0,0,0.15) !important;
+  color: var(--cyber-text-primary) !important;
+  padding: 0.125rem 0.5rem !important;
+  border-radius: 6px !important;
+  border: 1px solid var(--cyber-border) !important;
+}
+
+/* Buttons that used outline/gray borders in admin pages */
+.admin-layout .border-gray-300 {
+  border-color: var(--cyber-border) !important;
+}
+
+/* Small helper styles to ensure readable badges and tags */
+.admin-layout .bg-blue-100.text-blue-600,
+.admin-layout .px-2.py-1.bg-gray-100,
+.admin-layout .bg-gray-100.text-gray-700 {
+  background: var(--cyber-elevated-bg) !important;
+  color: var(--cyber-text-primary) !important;
+  border: 1px solid var(--cyber-border) !important;
+}
+
+/* Ensure any inline headings created with tailwind classes are visible */
+.admin-layout .text-4xl,
+.admin-layout .text-3xl,
+.admin-layout .text-2xl,
+.admin-layout .text-xl,
+.admin-layout .text-lg {
+  color: var(--cyber-text-primary) !important;
+}
+
+/* Links that used blue colors should use cyber accent */
+.admin-layout .text-blue-600:hover,
+.admin-layout a.text-blue-600:hover {
+  color: var(--cyber-blue-secondary) !important;
+}
+
+/* small utility: neutralize white backgrounds inside admin cards */
+.admin-layout .shadow-xl,
+.admin-layout .shadow-lg,
+.admin-layout .shadow-sm {
+  box-shadow: none !important;
+}
+
+/* Cyber input and table header helpers used by admin pages */
+.cyber-input {
+  background: var(--cyber-elevated-bg) !important;
+  border: 1px solid var(--cyber-border) !important;
+  color: var(--cyber-text-primary) !important;
+  padding-left: 2.5rem; /* keeps space for icons placed absolutely */
+  height: 44px;
+}
+
+.cyber-table-header {
+  background: linear-gradient(180deg, rgba(7,12,30,0.6), rgba(15,21,53,0.6));
+  border-bottom: 1px solid var(--cyber-border) !important;
+}
+
+/* Ensure stacked cyber-cards have visible gaps when used one after another */
+.admin-main .cyber-card {
+  margin-bottom: var(--spacing-lg);
+}
+
+/* Table layout & row styling improvements */
+.admin-layout table { font-size: 0.95rem; }
+.admin-layout td { vertical-align: middle; }
+.admin-layout td > .flex { align-items: center; gap: var(--spacing-md); }
+
+/* zebra striping for readability */
+.admin-layout tbody tr:nth-child(even) {
+  background: rgba(255,255,255,0.015);
+}
+.admin-layout tbody tr:nth-child(odd) {
+  background: rgba(0,0,0,0.01);
+}
+
+/* Stronger hover state for rows and clickable buttons */
+.admin-layout tr:hover {
+  background: rgba(0, 212, 255, 0.04) !important;
+}
+
+/* Override common Tailwind hover utilities that remained in JSX */
+.admin-layout .hover\:bg-gray-50:hover,
+.admin-layout .hover\:bg-blue-50:hover,
+.admin-layout .hover\:bg-white:hover,
+.admin-layout .hover\:bg-gray-100:hover {
+  background: rgba(0, 212, 255, 0.03) !important;
+}
+
+/* Background utility overrides for frequently used button/bg colors */
+.admin-layout .bg-blue-600,
+.admin-layout .bg-blue-700 {
+  background: linear-gradient(135deg, var(--cyber-blue-primary), var(--cyber-blue-secondary)) !important;
+  color: white !important;
+}
+.admin-layout .bg-blue-600:hover,
+.admin-layout .bg-blue-700:hover {
+  filter: brightness(1.05) !important;
+}
+.admin-layout .bg-green-600 {
+  background: linear-gradient(135deg, var(--cyber-green), var(--cyber-green-light)) !important;
+  color: white !important;
+}
+.admin-layout .bg-red-600 {
+  background: linear-gradient(135deg, var(--cyber-red), #ff6b6b) !important;
+  color: white !important;
+}
+
+/* Ensure small badges/tags have consistent spacing and aren't clipped */
+.admin-layout .badge,
+.admin-layout .px-2.py-1,
+.admin-layout .px-2 {
+  padding: 0.25rem 0.5rem !important;
+  border-radius: 999px !important;
+}
+
+/* Improve table cell typography and truncation */
+.admin-layout td .font-semibold {
+  color: var(--cyber-text-primary) !important;
+}
+.admin-layout td .text-xs,
+.admin-layout td .text-sm {
+  color: var(--cyber-text-secondary) !important;
+}
+
+/* Upcoming environment cards (home + labs) — shared hover */
+.upcoming-env-card {
+  cursor: default;
+  border: 1px solid var(--cyber-border);
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    opacity 0.2s ease,
+    background-color 0.2s ease;
+}
+.upcoming-env-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--cyber-border-focus);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.35),
+    0 0 0 1px rgba(16, 185, 129, 0.12);
+}
+.upcoming-env-card--home {
+  background: var(--cyber-card-bg);
+}
+.upcoming-env-card--labs {
+  background: var(--cyber-elevated-bg);
+  opacity: 0.65;
+}
+.upcoming-env-card--labs:hover {
+  opacity: 1;
+  background: var(--cyber-card-bg);
+}
+
+

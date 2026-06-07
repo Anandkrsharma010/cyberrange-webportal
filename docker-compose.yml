@@ -1,0 +1,129 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: cyberrange-db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: cyberrange
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cyberrange"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: cyberrange-redis
+    restart: always
+    ports:
+      - "6380:6379"
+
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: "../backend /terraform-feature-mainwebsite-ui-updates"
+      dockerfile: Dockerfile
+    container_name: cyberrange-backend
+    restart: always
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/cyberrange
+      - MIGRATION_DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/cyberrange
+      - JWT_SECRET=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      - GOOGLE_CLIENT_ID=local-dev
+      - REDIS_URL=redis://redis:6379/0
+      - ENABLE_DOCS=true
+      - CORS_ALLOWED_ORIGINS=["*"]
+      - HEADSCALE_API_KEY=dummy
+      - HEADSCALE_API_URL=http://localhost:8080
+      - RAZORPAY_KEY_ID=rzp_test_SslKiL78qiKwa5
+      - RAZORPAY_KEY_SECRET=J0RXiQsUaLPwSVyBaQ8UzMZS
+      - RAZORPAY_WEBHOOK_SECRET=dummy_webhook_secret
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  lab_worker:
+    build:
+      context: "../backend /terraform-feature-mainwebsite-ui-updates"
+      dockerfile: Dockerfile
+    container_name: cyberrange-lab-worker
+    restart: always
+    command: python -m backend.workers.run_lab_worker
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/cyberrange
+      - MIGRATION_DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/cyberrange
+      - JWT_SECRET=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      - GOOGLE_CLIENT_ID=local-dev
+      - REDIS_URL=redis://redis:6379/0
+      - ENABLE_DOCS=true
+      - CORS_ALLOWED_ORIGINS=["*"]
+      - HEADSCALE_API_KEY=dummy
+      - HEADSCALE_API_URL=http://localhost:8080
+      - RAZORPAY_KEY_ID=rzp_test_SslKiL78qiKwa5
+      - RAZORPAY_KEY_SECRET=J0RXiQsUaLPwSVyBaQ8UzMZS
+      - RAZORPAY_WEBHOOK_SECRET=dummy_webhook_secret
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  lab_cleanup_worker:
+    build:
+      context: "../backend /terraform-feature-mainwebsite-ui-updates"
+      dockerfile: Dockerfile
+    container_name: cyberrange-cleanup-worker
+    restart: always
+    command: python -m backend.workers.run_lab_cleanup_worker
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/cyberrange
+      - MIGRATION_DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/cyberrange
+      - JWT_SECRET=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      - GOOGLE_CLIENT_ID=local-dev
+      - REDIS_URL=redis://redis:6379/0
+      - ENABLE_DOCS=true
+      - CORS_ALLOWED_ORIGINS=["*"]
+      - HEADSCALE_API_KEY=dummy
+      - HEADSCALE_API_URL=http://localhost:8080
+      - RAZORPAY_KEY_ID=rzp_test_SslKiL78qiKwa5
+      - RAZORPAY_KEY_SECRET=J0RXiQsUaLPwSVyBaQ8UzMZS
+      - RAZORPAY_WEBHOOK_SECRET=dummy_webhook_secret
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: "."
+      dockerfile: Dockerfile
+    container_name: cyberrange-frontend
+    restart: always
+    ports:
+      - "18080:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+      - NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_SslKiL78qiKwa5
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

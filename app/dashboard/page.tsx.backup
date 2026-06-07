@@ -1,0 +1,1401 @@
+'use client'
+
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { Progress } from "@/components/ui/progress"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs"
+import { Play, RotateCcw, TrendingUp, Calendar, Trophy, Activity, Settings, LogOut, User, Home, BookOpenCheck, Clock, Star, ArrowRight, Target, BookOpen, CheckCircle } from 'lucide-react'
+import Header from '@/components/Header'
+import UserCredentialsModal from '@/components/UserCredentialsModal'
+import VpnKeyManager from '@/components/VpnKeyManager'
+import AwsCodeEntry from '@/components/AwsCodeEntry'
+import Link from "next/link"
+import Image from "next/image"
+import { useAuth } from '@/lib/auth'
+import { fallbackLabs, getLabs } from '@/lib/labs'
+import { apiClient } from '@/lib/api'
+import { adminApi } from '@/lib/adminApi'
+import { formatDateIST } from '@/lib/dateUtils'
+import logger from '@/lib/logger'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
+interface ApiResponse<T> {
+  success: boolean
+  message?: string
+  data?: T
+}
+
+// VM Card Component for professional display
+function VMCard({ vm, idx }: { vm: any; idx: number }) {
+  const [showPassword, setShowPassword] = React.useState(false);
+  
+  const getRoleColor = (name: string) => {
+    if (name && name.includes('controller')) return 'bg-blue-100 text-blue-800 border-blue-300';
+    if (name && name.includes('client')) return 'bg-purple-100 text-purple-800 border-purple-300';
+    if (name && name.includes('wazuh')) return 'bg-orange-100 text-orange-800 border-orange-300';
+    return 'bg-gray-100 text-gray-800 border-gray-300';
+  };
+  
+  const copyToClipboard = (text: string) => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+    }
+  };
+  
+  const primaryIP = vm.public_ip || vm.private_ip;
+  
+  return (
+    <div className={`border-2 rounded-lg p-4 space-y-3 ${getRoleColor(vm.name)}`}>
+      {/* VM Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <span className="text-lg">🖥️</span>
+          <div>
+            <div className="font-bold text-sm">{vm.role || vm.name || 'Virtual Machine'}</div>
+            <div className="text-xs opacity-75">{vm.name}</div>
+          </div>
+        </div>
+        {vm.url && (
+          <button 
+            onClick={() => window.open(vm.url, '_blank')}
+            className="text-xs bg-white px-3 py-1 rounded border hover:bg-gray-50"
+          >
+            Open Web UI →
+          </button>
+        )}
+      </div>
+
+      {/* IP */}
+      {primaryIP && (
+        <div className="bg-white rounded-lg p-3 border">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-semibold text-gray-600">
+              {vm.public_ip ? '🌐 Public IP' : '🔒 Private IP'}
+            </span>
+            <button 
+              onClick={() => copyToClipboard(primaryIP)}
+              className="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              📋 Copy
+            </button>
+          </div>
+          <code className="text-sm font-mono font-bold block">{primaryIP}</code>
+        </div>
+      )}
+
+      {/* Username */}
+      {vm.username && (
+        <div className="bg-white rounded-lg p-3 border">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-semibold text-gray-600">👤 Username</span>
+            <button 
+              onClick={() => copyToClipboard(vm.username)}
+              className="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              📋 Copy
+            </button>
+          </div>
+          <code className="text-sm font-mono font-bold block">{vm.username}</code>
+        </div>
+      )}
+
+      {/* Password */}
+      {vm.password && (
+        <div className="bg-white rounded-lg p-3 border">
+          <div className="flex items-center justify-between mb-1">
+            <span className="text-xs font-semibold text-gray-600">🔑 Password</span>
+            <div className="flex gap-1">
+              <button 
+                onClick={() => setShowPassword(!showPassword)}
+                className="text-xs px-2 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
+              >
+                {showPassword ? '🙈 Hide' : '👁️ Show'}
+              </button>
+              <button 
+                onClick={() => copyToClipboard(vm.password)}
+                className="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
+              >
+                📋 Copy
+              </button>
+            </div>
+          </div>
+          <code className="text-sm font-mono font-bold block">
+            {showPassword ? vm.password : '••••••••••••'}
+          </code>
+        </div>
+      )}
+
+      {/* RDP Connection - OS Specific Instructions */}
+      {vm.username && primaryIP && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 border-2 border-blue-300">
+          <div className="font-semibold text-sm text-blue-900 mb-2">⚡ Connect via Remote Desktop (RDP)</div>
+          
+          {/* Windows */}
+          <div className="bg-white rounded p-2 mb-2 border border-blue-200">
+            <div className="font-semibold text-xs text-gray-700 mb-1">🪟 Windows (Quickest):</div>
+            <ol className="text-xs text-gray-600 space-y-1 pl-4 list-decimal">
+              <li>Press <kbd className="bg-gray-200 px-1 rounded text-xs">Win+R</kbd></li>
+              <li>Type: <code className="bg-gray-100 px-1">mstsc /v:{primaryIP}</code></li>
+              <li>Press Enter</li>
+            </ol>
+            <button 
+              onClick={() => {
+                copyToClipboard(`mstsc /v:${primaryIP}`);
+                alert('✅ Command copied! Now press Win+R and paste it');
+              }}
+              className="text-xs px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 mt-1 w-full"
+            >
+              📋 Copy Windows Command
+            </button>
+          </div>
+          
+          {/* Mac */}
+          <div className="bg-white rounded p-2 mb-2 border border-purple-200">
+            <div className="font-semibold text-xs text-gray-700 mb-1">🍎 Mac:</div>
+            <ol className="text-xs text-gray-600 space-y-1 pl-4 list-decimal">
+              <li>Install <a href="https://apps.apple.com/app/microsoft-remote-desktop/id1295203466" target="_blank" className="text-blue-600 underline">Microsoft Remote Desktop</a> from App Store</li>
+              <li>Open app → Click "Add PC"</li>
+              <li>PC name: <code className="bg-gray-100 px-1">{primaryIP}</code></li>
+              <li>Click Add → Double-click to connect</li>
+            </ol>
+            <button 
+              onClick={() => {
+                copyToClipboard(primaryIP);
+                alert('✅ IP copied! Paste into "PC name" field in Microsoft Remote Desktop app');
+              }}
+              className="text-xs px-2 py-1 bg-purple-500 text-white rounded hover:bg-purple-600 mt-1 w-full"
+            >
+              📋 Copy IP Address
+            </button>
+          </div>
+          
+          {/* Linux */}
+          <div className="bg-white rounded p-2 border border-green-200">
+            <div className="font-semibold text-xs text-gray-700 mb-1">🐧 Linux:</div>
+            <ol className="text-xs text-gray-600 space-y-1 pl-4 list-decimal">
+              <li>Install: <code className="bg-gray-100 px-1">sudo apt install remmina</code></li>
+              <li>Open Remmina → Protocol: RDP</li>
+              <li>Server: <code className="bg-gray-100 px-1">{primaryIP}</code></li>
+              <li>Click Connect</li>
+            </ol>
+            <button 
+              onClick={() => {
+                copyToClipboard(primaryIP);
+                alert('✅ IP copied! Paste into Remmina server field');
+              }}
+              className="text-xs px-2 py-1 bg-green-500 text-white rounded hover:bg-green-600 mt-1 w-full"
+            >
+              📋 Copy IP Address
+            </button>
+          </div>
+          
+          <div className="text-xs text-gray-600 mt-2 bg-yellow-50 p-2 rounded border border-yellow-200">
+            💡 <strong>When prompted:</strong> Use username <code className="bg-gray-200 px-1">{vm.username}</code> and password shown above
+          </div>
+        </div>
+      )}
+
+      {/* Note */}
+      {vm.note && (
+        <div className="text-xs text-gray-600 italic bg-yellow-50 p-2 rounded">
+          💡 {vm.note}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Get user progress data from backend - PROFESSIONAL IMPLEMENTATION
+const getUserProgress = async (userId: string) => {
+  try {
+    
+  // Fetch user's progress and get expiry data from admin API
+  logger.log('🔍 Fetching user progress and expiry data...');
+  logger.log('🔍 Current timestamp:', new Date().toISOString());
+  logger.log('🔍 User ID:', userId);
+    
+    const [progressResponse, purchasedLabsResponse] = await Promise.all([
+      apiClient.get(`/progress/user/${userId}`).catch(err => {
+        logger.error('❌ Error fetching user progress:', err);
+        return { success: false, data: [] };
+      }),
+      // Get purchased labs with expiry data
+      apiClient.getActiveDeployments().catch(err => {
+        logger.error('❌ Error fetching active deployments:', err);
+        return { success: false, data: [] };
+      })
+    ])
+    
+  logger.log('📊 Progress response:', progressResponse);
+  logger.log('🛒 Purchased labs response:', purchasedLabsResponse);
+    
+    // Get active deployments data - NEW structure
+    const purchasedLabs = purchasedLabsResponse.success && purchasedLabsResponse.data ? purchasedLabsResponse.data : [];
+    
+    // DEBUG: Log the actual API responses
+  logger.log('🔍 DEBUG - API Responses:');
+  logger.log('📊 Progress Response:', progressResponse);
+  logger.log('🛒 Purchased Labs Response:', purchasedLabsResponse);
+  logger.log('🛒 Purchased Labs Data:', purchasedLabs);
+  logger.log('🛒 First Purchased Lab:', purchasedLabs[0]);
+    
+    // SIMPLE APPROACH: Use purchased labs data directly
+    if (purchasedLabs.length > 0) {
+      logger.log('🔍 Using purchased labs data directly', {
+        labs: purchasedLabs.map((p: any) => ({
+          labId: p.labId,
+        labTitle: p.labTitle,
+          status: p.status
+        }))
+      });
+    }
+    
+    // SIMPLE APPROACH: Use purchased labs data directly - no complex matching
+    if (purchasedLabs.length > 0) {
+      // Transform deployments to dashboard format
+      const labProgress = await Promise.all(purchasedLabs.map(async (deployment: any) => {
+        const lab = {
+          id: deployment.lab_id,
+          _id: deployment.deployment_id,
+          title: deployment.lab_title || 'Unknown Lab',
+          description: '',
+          curriculum: []
+        };
+        
+        // Get progress data for this lab if it exists
+        let progressData = null;
+        if (progressResponse.success && progressResponse.data) {
+          progressData = progressResponse.data.find((progress: any) => {
+            return progress.lab?.id === lab.id || 
+                   progress.lab?._id?.toString() === lab._id?.toString() ||
+                   progress.lab?.title === lab.title;
+          });
+        }
+        
+        const lessonProgress = progressData?.lessonProgress || [];
+        const completedLessons = lessonProgress.filter((lesson: any) => lesson.progressPercentage === 100).length;
+        const totalLessons = progressData?.lab?.curriculum?.length || 4;
+        const progressPercentage = progressData?.overallProgress || 0;
+        const totalTimeSeconds = progressData?.totalTimeSpent || 0;
+        const timeSpentHours = Math.round((totalTimeSeconds / 3600) * 10) / 10;
+        
+        // Get quiz progress
+        let quizScore = null;
+        if (progressData) {
+          try {
+            const quizResponse = await apiClient.get(`/quiz/${lab.id}/progress`);
+            if (quizResponse.success && quizResponse.data) {
+              const quizProgress = quizResponse.data;
+              if (quizProgress.completedChallenges.length > 0) {
+                const totalChallenges = quizProgress.completedChallenges.length + (quizProgress.currentChallenge || 0);
+                quizScore = Math.round((quizProgress.totalPoints / (totalChallenges * 100)) * 100);
+              }
+            }
+          } catch {
+            // No quiz progress found
+          }
+        }
+        
+        // Determine status
+        let status = 'Not Started';
+        if (progressPercentage === 100) {
+          status = 'Completed';
+        } else if (progressPercentage > 0) {
+          status = 'In Progress';
+        }
+        
+        // Format last accessed time
+        const lastAccessed = progressData?.lastAccessed 
+          ? new Date(progressData.lastAccessed).toLocaleDateString()
+          : 'Never';
+        
+        return {
+          id: lab.id,
+          title: lab.title,
+          description: lab.description,
+          progress: progressPercentage,
+          timeSpent: `${timeSpentHours} hours`,
+          quizScore,
+          quizProgress: progressData?.quizProgress || null,
+          status,
+          lastAccessed,
+          completedLessons,
+          totalLessons,
+          currentLesson: progressData?.currentLesson,
+          lessonProgress: lessonProgress,
+          isCompleted: progressData?.isCompleted || false,
+          completedAt: progressData?.completedAt,
+          credentials: purchase.credentials || null,
+          // Lab Expiry System Fields - DIRECT FROM PURCHASED LABS
+          expiryDate: deployment.expires_at,
+          daysRemaining: deployment.time_remaining?.hours || 0,
+          isExpired: deployment.time_remaining?.hours === 0,
+          renewalCount: 0,
+          // NEW Deployment Status - map AD Lab status to frontend display
+          deploymentStatus: deployment.status === 'completed' ? 'active' : 
+                          deployment.status === 'deploying' ? 'deploying' : 
+                          deployment.status === 'partial' ? 'active' :
+                          deployment.status === 'error' ? 'failed' :
+                          deployment.status,
+          deployment_id: deployment.deployment_id,
+          instanceId: deployment.deployment_id,
+          deploymentError: null,
+          vmIpAddress: null,
+          vmUsername: null,
+          vmKey: null,
+            vmInstances: deployment.vm_instances || [],  // Now properly formatted with names
+            vpnInfo: deployment.vpn_info || null,  // VPN setup information
+            deploymentId: deployment.deployment_id,
+            credentialsSent: deployment.has_credentials
+        };
+      }));
+
+      // Calculate overall metrics
+      const totalLabs = labProgress.length
+      const completedLabs = labProgress.filter((lab: any) => lab.isCompleted).length
+      const totalLessons = labProgress.reduce((sum: number, lab: any) => sum + lab.totalLessons, 0)
+      const completedLessons = labProgress.reduce((sum: number, lab: any) => sum + lab.completedLessons, 0)
+      const totalTimeSpent = labProgress.reduce((sum: number, lab: any) => {
+        const timeStr = lab.timeSpent.replace(' hours', '')
+        return sum + parseFloat(timeStr)
+      }, 0)
+      
+      // Generate recent activity from progress data
+      const recentActivity = labProgress
+        .filter((lab: any) => lab.lessonProgress && lab.lessonProgress.length > 0)
+        .flatMap((lab: any) => 
+          lab.lessonProgress
+            .filter((lesson: any) => lesson.completedAt)
+            .map((lesson: any) => ({
+              id: `${lab.id}-${lesson.lessonId}`,
+              title: `Completed ${lesson.lessonName} in ${lab.title}`,
+              time: formatDateIST(lesson.completedAt),
+              points: Math.round(lesson.progressPercentage * 1.5) // Convert to points
+            }))
+        )
+        .sort((a: any, b: any) => new Date(b.time).getTime() - new Date(a.time).getTime())
+        .slice(0, 5) // Show only 5 most recent activities
+
+      // All purchased labs are already processed above - no need for additional logic
+      const allPurchasedLabs = labProgress
+
+      return {
+        totalLabs: allPurchasedLabs.length,
+        completedLabs,
+        totalLessons,
+        completedLessons,
+        totalTimeSpent: Math.round(totalTimeSpent * 10) / 10,
+        purchasedLabs: allPurchasedLabs,
+        recentActivity
+      }
+    } else {
+      // No purchased labs - return empty data
+      return {
+        totalLabs: 0,
+        completedLabs: 0,
+        totalLessons: 0,
+        completedLessons: 0,
+        totalTimeSpent: 0,
+        purchasedLabs: [],
+        recentActivity: []
+      }
+    }
+  } catch (error) {
+    logger.error('Error fetching user progress:', error)
+  }
+  
+  // Fallback to empty data
+  return {
+    totalLabs: 0,
+    completedLabs: 0,
+    totalLessons: 0,
+    completedLessons: 0,
+    totalTimeSpent: 0,
+    purchasedLabs: [],
+    recentActivity: []
+  }
+}
+
+export default function DashboardPage() {
+  const router = useRouter()
+  const { user, logout, isLabPurchased } = useAuth()
+  const [activeTab, setActiveTab] = useState('home')
+  const [userProgress, setUserProgress] = useState({
+    totalLabs: 0,
+    completedLabs: 0,
+    totalLessons: 0,
+    completedLessons: 0,
+    totalTimeSpent: 0,
+    purchasedLabs: [] as any[],
+    recentActivity: [] as any[]
+  })
+  const [labs, setLabs] = useState(fallbackLabs) // Initialize with fallback labs
+  const [isLoading, setIsLoading] = useState(true)
+  const [isCredentialsModalOpen, setIsCredentialsModalOpen] = useState(false)
+
+  // Poll deployment status for deploying labs
+  useEffect(() => {
+    if (!user || userProgress.purchasedLabs.length === 0) return;
+
+    // Find labs that are still deploying
+    const deployingLabs = userProgress.purchasedLabs.filter(
+      (lab: any) => lab.deploymentStatus === 'deploying' || lab.deploymentStatus === 'pending'
+    );
+
+    if (deployingLabs.length === 0) return;
+
+    logger.log(`🔄 Polling deployment status for ${deployingLabs.length} labs...`);
+
+    const checkDeploymentStatus = async () => {
+      try {
+        const response = await apiClient.getActiveDeployments();
+        if (response.success && response.data) {
+          const updatedLabs = response.data;
+          
+          // Check if any lab's deployment status changed
+          const hasChanges = updatedLabs.some((updated: any) => {
+            const current = userProgress.purchasedLabs.find((c: any) => 
+              c.deployment_id === updated.deployment_id
+            );
+            
+            if (!current) return false;
+            
+            const statusChanged = current.deploymentStatus !== updated.status;
+            const instancesChanged = (current.vmInstances?.length || 0) !== (Object.keys(updated.instances || {}).length || 0);
+            
+            return statusChanged || vmInstancesChanged;
+          });
+
+          if (hasChanges) {
+            logger.log('✅ Deployment status updated, reloading page...');
+            window.location.reload();
+          }
+        }
+      } catch (error) {
+        logger.error('❌ Error polling deployment status:', error);
+      }
+    };
+
+    // Poll every 5 seconds while deploying
+    const intervalId = setInterval(checkDeploymentStatus, 5000);
+
+    return () => clearInterval(intervalId);
+  }, [user, userProgress.purchasedLabs]);
+
+  useEffect(() => {
+    if (!user) {
+      router.push('/login')
+      return
+    }
+
+    // Fetch user progress and labs from backend
+    const fetchData = async () => {
+      try {
+        setIsLoading(true)
+          logger.log('🚀 Starting dashboard data fetch...');
+        
+        // Fetch purchased labs data from API (includes deployment data)
+        logger.log('🛒 Fetching purchased labs from API...');
+        const purchasedLabsResponse = await apiClient.getActiveDeployments().catch(err => {
+          logger.error('❌ Error fetching purchased labs:', err);
+          return { success: false, data: { purchasedLabs: [] } };
+        });
+
+        const deploymentsFromAPI = purchasedLabsResponse.success && purchasedLabsResponse.data ? purchasedLabsResponse.data : [];
+        logger.log('📊 Active deployments from API:', deploymentsFromAPI);
+        
+        // Transform deployments to dashboard format
+        setUserProgress({
+          totalLabs: deploymentsFromAPI.length,
+          completedLabs: 0,
+          totalLessons: deploymentsFromAPI.length * 4,
+          completedLessons: 0,
+          totalTimeSpent: 0,
+          purchasedLabs: deploymentsFromAPI.map((deployment: any) => ({
+            id: deployment.lab_id,
+            deployment_id: deployment.deployment_id,
+            _id: deployment.deployment_id,
+            title: deployment.lab_title || 'Unknown Lab',
+            description: '',
+            // NEW Deployment data - map AD Lab status to frontend display
+            deploymentStatus: deployment.status === 'completed' ? 'active' : 
+                            deployment.status === 'deploying' ? 'deploying' : 
+                            deployment.status === 'partial' ? 'active' :
+                            deployment.status === 'error' ? 'failed' :
+                            deployment.status,
+            instanceId: deployment.deployment_id,
+            deploymentError: null,
+            deploymentAttempts: 0,
+            lastDeploymentAttempt: deployment.created_at,
+            // VM Credentials from instances
+            vmIpAddress: null,
+            vmUsername: null,
+            vmKey: null,
+            vmInstances: deployment.vm_instances || [],  // Now properly formatted with names
+            // Expiry info
+            expiryDate: deployment.expires_at,
+            daysRemaining: deployment.time_remaining?.hours || 0,
+            isExpired: deployment.time_remaining?.hours === 0,
+            // Credential status
+            credentialsSent: deployment.has_credentials,
+            credentialsSentAt: deployment.created_at
+          })),
+          recentActivity: []
+        })
+      } catch (error) {
+        logger.error('Error fetching data:', error)
+        // If API fails, show empty state
+        setUserProgress({
+          totalLabs: 0,
+          completedLabs: 0,
+          totalLessons: 0,
+          completedLessons: 0,
+          totalTimeSpent: 0,
+          purchasedLabs: [],
+          recentActivity: []
+        })
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [user, router])
+
+  if (!user) {
+    return <div>Loading...</div>
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your dashboard...</p>
+        </div>
+      </div>
+    )
+  }
+
+  // Calculate overall progress metrics
+  const overallProgress = userProgress.totalLabs > 0
+    ? Math.round(
+        userProgress.purchasedLabs.reduce((sum: number, lab: any) => sum + (lab.progress || 0), 0) /
+          userProgress.totalLabs
+      )
+    : 0
+
+  const handleLogout = () => {
+    logout()
+    router.push('/')
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Header active="dashboard" />
+
+      <div className="container mx-auto px-4 py-8">
+        {/* Welcome Section */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            Welcome back, {user.name.split(' ')[0]}! 👋
+          </h1>
+          <p className="text-gray-600">Ready to continue your cybersecurity journey?</p>
+        </div>
+
+        {/* Stats Table - Header Row + Data Row */}
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="flex items-center space-x-2">
+              <Activity className="w-5 h-5" />
+              <span>Your Learning Statistics</span>
+            </CardTitle>
+            <CardDescription>
+              Track your progress and achievements
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b-2 border-gray-300">
+                    <th className="py-3 px-6 bg-gray-100 font-semibold text-gray-700 text-left">
+                      <div className="flex items-center space-x-2">
+                        <BookOpenCheck className="w-5 h-5 text-blue-600" />
+                        <span>Total Labs</span>
+                      </div>
+                    </th>
+                    <th className="py-3 px-6 bg-gray-100 font-semibold text-gray-700 text-left border-l">
+                      <div className="flex items-center space-x-2">
+                        <BookOpen className="w-5 h-5 text-green-600" />
+                        <span>Lessons</span>
+                      </div>
+                    </th>
+                    <th className="py-3 px-6 bg-gray-100 font-semibold text-gray-700 text-left border-l">
+                      <div className="flex items-center space-x-2">
+                        <Clock className="w-5 h-5 text-purple-600" />
+                        <span>Time Spent</span>
+                      </div>
+                    </th>
+                    <th className="py-3 px-6 bg-gray-100 font-semibold text-gray-700 text-left border-l">
+                      <div className="flex items-center space-x-2">
+                        <Calendar className="w-5 h-5 text-amber-600" />
+                        <span>Member Since</span>
+                      </div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td className="py-4 px-6 border-r">
+                      <div className="text-2xl font-bold text-gray-900">{userProgress.totalLabs}</div>
+                      <div className="text-sm text-gray-600 mt-1">{userProgress.completedLabs} completed</div>
+                    </td>
+                    <td className="py-4 px-6 border-r">
+                      <div className="text-2xl font-bold text-gray-900">{userProgress.completedLessons}/{userProgress.totalLessons}</div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {userProgress.totalLessons > 0 
+                          ? Math.round((userProgress.completedLessons / userProgress.totalLessons) * 100)
+                          : 0}% complete
+                      </div>
+                    </td>
+                    <td className="py-4 px-6 border-r">
+                      <div className="text-2xl font-bold text-gray-900">{userProgress.totalTimeSpent}h</div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {userProgress.totalLabs > 0 
+                          ? `Avg: ${(userProgress.totalTimeSpent / userProgress.totalLabs).toFixed(1)}h per lab`
+                          : 'Start learning now'}
+                      </div>
+                    </td>
+                    <td className="py-4 px-6">
+                      <div className="text-lg font-bold text-gray-900">{formatDateIST(user.created_at)}</div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {(() => {
+                          if (!user.created_at) return 'Recently joined';
+                          const days = Math.floor((Date.now() - new Date(user.created_at).getTime()) / (1000 * 60 * 60 * 24));
+                          if (days === 0) return 'Joined today';
+                          if (days === 1) return '1 day ago';
+                          if (days < 30) return `${days} days ago`;
+                          if (days < 60) return '1 month ago';
+                          return `${Math.floor(days / 30)} months ago`;
+                        })()}
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="w-full">
+          {/* My Labs Section */}
+          <div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center space-x-2">
+                  <BookOpenCheck className="w-5 h-5" />
+                  <span>My Labs</span>
+                </CardTitle>
+                <CardDescription>
+                  Continue your learning journey
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {userProgress.purchasedLabs.length === 0 ? (
+                  <div className="text-center py-8">
+                    <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <BookOpenCheck className="w-8 h-8 text-gray-400" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">No Labs Purchased Yet</h3>
+                    <p className="text-gray-600 mb-4">
+                      Purchase labs from our catalog to start your cybersecurity learning journey
+                    </p>
+                    <Button asChild>
+                      <Link href="/labs">
+                        Browse Labs
+                        <ArrowRight className="ml-2 w-4 h-4" />
+                      </Link>
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    {userProgress.purchasedLabs.map((userLab: { 
+                      id: string; 
+                      title: string;
+                      description: string;
+                      progress: number; 
+                      timeSpent: string; 
+                      quizScore: number | null; 
+                      status: string; 
+                      lastAccessed: string; 
+                      completedLessons: number; 
+                      totalLessons: number;
+                      currentLesson?: string;
+                      lessonProgress?: any[];
+                      isCompleted: boolean;
+                      completedAt?: string;
+                      deploymentStatus?: string;
+                      instanceId?: string;
+                      deploymentError?: string;
+                      vmIpAddress?: string;
+                      vmUsername?: string;
+                      vmKey?: string;
+                      vmInstances?: any[];
+                      credentialsSent?: boolean;
+                    }) => {
+                      return (
+                        <div key={userLab.id || (userLab as any)._id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1">
+                              <h3 className="font-semibold text-gray-900 mb-1">{userLab.title}</h3>
+                              <p className="text-sm text-gray-600 mb-2 leading-relaxed">
+                                {userLab.description}
+                              </p>
+                              <div className="flex items-center space-x-4 text-sm text-gray-500">
+                                <span className="flex items-center">
+                                  <Clock className="w-4 h-4 mr-1" />
+                                  {userLab.timeSpent}
+                                </span>
+                                <span>Last accessed: {userLab.lastAccessed}</span>
+                                <span className="flex items-center">
+                                  <BookOpen className="w-4 h-4 mr-1" />
+                                  {userLab.completedLessons}/{userLab.totalLessons} lessons
+                                </span>
+                                {userLab.currentLesson && (
+                                  <span className="flex items-center text-blue-600">
+                                    <Target className="w-4 h-4 mr-1" />
+                                    Current: {userLab.currentLesson}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            <Badge variant={userLab.status === 'Completed' ? 'default' : userLab.status === 'In Progress' ? 'secondary' : 'outline'}>
+                              {userLab.status}
+                            </Badge>
+                          </div>
+                          
+                          <div className="mb-3">
+                            <div className="flex items-center justify-between text-sm mb-1">
+                              <span>Overall Progress</span>
+                              <span>{userLab.progress}%</span>
+                            </div>
+                            <Progress value={userLab.progress} className="h-2" />
+                          </div>
+
+                          {/* Detailed Lesson Progress */}
+                          {userLab.lessonProgress && userLab.lessonProgress.length > 0 && (
+                            <div className="mb-3">
+                              <div className="text-sm font-medium text-gray-700 mb-2">Lesson Progress:</div>
+                              <div className="space-y-1">
+                                {userLab.lessonProgress.map((lesson: any, index: number) => (
+                                  <div key={index} className="flex items-center justify-between text-xs">
+                                    <span className="text-gray-600">{lesson.lessonName}</span>
+                                    <div className="flex items-center space-x-2">
+                                      <span className="text-gray-500">{lesson.progressPercentage}%</span>
+                                      <div className="w-16 h-1 bg-gray-200 rounded">
+                                        <div 
+                                          className="h-1 bg-blue-500 rounded" 
+                                          style={{ width: `${lesson.progressPercentage}%` }}
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+
+                          {/* Lab Expiry & Renewal - Side by Side Layout */}
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+                            {/* Lab Expiry Information */}
+                            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="text-sm font-medium text-amber-800">Lab Access Expiry</div>
+                                <Badge 
+                                  variant={
+                                    (userLab as any).isExpired ? 'destructive' : 
+                                    (userLab as any).daysRemaining <= 7 ? 'destructive' :
+                                    (userLab as any).daysRemaining <= 14 ? 'secondary' : 'default'
+                                  }
+                                >
+                                  {(userLab as any).isExpired ? 'Expired' : 
+                                   (userLab as any).daysRemaining <= 0 ? 'Expired' :
+                                   `${(userLab as any).daysRemaining || 0} days left`}
+                                </Badge>
+                              </div>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-amber-700">Expiry Date:</span>
+                                  <span className="text-amber-800 font-medium">
+                                    {(userLab as any).expiryDate ? new Date((userLab as any).expiryDate).toLocaleDateString() : 'Not set'}
+                                  </span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-amber-700">Days Remaining:</span>
+                                  <span className="text-amber-800 font-medium">
+                                    {(userLab as any).daysRemaining >= 0 ? (userLab as any).daysRemaining : 0} days
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+
+                            {/* Lab Renewal Section - Always visible, buttons enabled based on expiry */}
+                            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                              <div className="text-sm font-medium text-green-800 mb-2">Extend Lab Access</div>
+                              <div className="grid grid-cols-2 gap-2">
+                                <div>
+                                  <div className="text-xs text-green-700 mb-1">30-Day • 20% off</div>
+                                  <Button 
+                                    size="sm" 
+                                    disabled={!((userLab as any).isExpired || (userLab as any).daysRemaining <= 7)}
+                                    className="w-full bg-green-600 hover:bg-green-700 text-white h-8 text-xs disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                    onClick={() => {
+                                      window.location.href = `/purchase/${userLab.id}?renewal=30&days=30&discount=20`;
+                                    }}
+                                  >
+                                    Extend 30 Days
+                                  </Button>
+                                </div>
+                                <div>
+                                  <div className="text-xs text-green-700 mb-1">60-Day • 30% off</div>
+                                  <Button 
+                                    size="sm" 
+                                    disabled={!((userLab as any).isExpired || (userLab as any).daysRemaining <= 7)}
+                                    className="w-full bg-green-600 hover:bg-green-700 text-white h-8 text-xs disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                    onClick={() => {
+                                      window.location.href = `/purchase/${userLab.id}?renewal=60&days=60&discount=30`;
+                                    }}
+                                  >
+                                    Extend 60 Days
+                                  </Button>
+                                </div>
+                              </div>
+                              {!((userLab as any).isExpired || (userLab as any).daysRemaining <= 7) && (
+                                <div className="mt-2 text-xs text-gray-600 text-center">
+                                  Extension available when lab expires in 7 days or less
+                                </div>
+                              )}
+                            </div>
+                          </div>
+
+                          {/* Deployment Status Section - AD Lab Always Shows */}
+                          {userLab.id === 'active-directory' && (
+                            <div className={`mb-3 p-3 rounded-lg border ${
+                              (userLab as any).deploymentStatus === 'active' ? 'bg-green-50 border-green-200' :
+                              (userLab as any).deploymentStatus === 'deploying' ? 'bg-blue-50 border-blue-200' :
+                              (userLab as any).deploymentStatus === 'failed' ? 'bg-red-50 border-red-200' :
+                              'bg-yellow-50 border-yellow-200'
+                            }`}>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="text-sm font-medium">
+                                  {(userLab as any).deploymentStatus === 'active' ? '✅ Lab Environment Active' :
+                                   (userLab as any).deploymentStatus === 'deploying' ? '⏳ Deploying Lab Environment...' :
+                                   (userLab as any).deploymentStatus === 'failed' ? '❌ Deployment Failed' :
+                                   '⏳ Lab Being Prepared...'}
+                                </div>
+                                <Badge variant={
+                                  (userLab as any).deploymentStatus === 'active' ? 'default' :
+                                  (userLab as any).deploymentStatus === 'deploying' ? 'secondary' :
+                                  (userLab as any).deploymentStatus === 'failed' ? 'destructive' :
+                                  'outline'
+                                }>
+                                  {(userLab as any).deploymentStatus || 'Setting up'}
+                                </Badge>
+                              </div>
+                              {(userLab as any).deploymentStatus === 'deploying' && (
+                                <div className="text-xs text-blue-700">
+                                  <p>🔄 Your lab environment is being provisioned. This may take 5-10 minutes.</p>
+                                  <p className="mt-1">Credentials will appear here automatically when ready.</p>
+                                </div>
+                              )}
+                              {(userLab as any).deploymentStatus === 'pending' && (
+                                <div className="text-xs text-yellow-700">
+                                  <p>⏳ Your lab will be deployed shortly. Please wait...</p>
+                                </div>
+                              )}
+                              {(userLab as any).deploymentStatus === 'failed' && (
+                                <div className="text-xs text-red-700">
+                                  <p>❌ {(userLab as any).deploymentError || 'Deployment failed. Please contact support.'}</p>
+                                  <Button size="sm" variant="outline" className="mt-2 text-xs">
+                                    Retry Deployment
+                                  </Button>
+                                </div>
+                              )}
+                              {(userLab as any).deploymentStatus === 'active' && (
+                                <div className="mt-2">
+                                  {/* VPN Setup Section (Step 1) - ALWAYS SHOW FOR ACTIVE LABS */}
+                                  {/* Removed deploymentId check - show for all active labs */}
+                                  {true && (
+                                    <div className="mt-4 bg-gradient-to-r from-indigo-50 to-purple-50 border-2 border-indigo-400 rounded-lg p-5 shadow-md">
+                                      <div className="flex items-center gap-2 mb-4">
+                                        <span className="text-2xl">🔐</span>
+                                        <div className="font-bold text-indigo-900 text-lg">Step 1: VPN Setup Required</div>
+                                      </div>
+                                      
+                                      <div className="bg-yellow-50 border border-yellow-300 rounded p-3 mb-4">
+                                        <div className="flex items-start gap-2">
+                                          <span className="text-xl">⚠️</span>
+                                          <div className="text-sm text-yellow-800">
+                                            <strong>Important:</strong> You MUST complete VPN setup before accessing lab VMs. Without VPN, the private IPs (10.20.1.x) will not be reachable.
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="space-y-3 text-sm">
+                                        {/* Step 1: Download Certificate */}
+                                        <div className="bg-white rounded-lg p-4 border-2 border-indigo-300 shadow-sm">
+                                          <div className="flex items-center gap-2 mb-2">
+                                            <span className="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">1</span>
+                                            <div className="font-bold text-gray-800">Download VPN Certificate</div>
+                                          </div>
+                                          <button 
+                                            onClick={async () => {
+                                              try {
+                                                const deploymentId = (userLab as any).deploymentId || (userLab as any).deployment_id;
+                                                logger.log('🔑 Downloading VPN device key - deploymentId:', deploymentId, 'user_id:', user?.user_id);
+                                                
+                                                if (!deploymentId) {
+                                                  alert('❌ Deployment ID not found. Please refresh the page.');
+                                                  return;
+                                                }
+
+                                                const fileName = `headscale_${user?.user_id || 'user'}.pem`;
+                                                
+                                                // Fetch device key from backend
+                                                const response = await apiClient.get(`/deployments/${deploymentId}/vpn-certificate`);
+                                                
+                                                if (!response.success || !response.data || !response.data.key) {
+                                                  logger.error('Failed to get VPN key:', response);
+                                                  alert('❌ Failed to get VPN key. Please contact support.');
+                                                  return;
+                                                }
+                                                
+                                                const deviceKey = response.data.key;
+                                                logger.log(`✅ Got device key (length: ${deviceKey.length} chars)`);
+                                                
+                                                // Create .pem file with JUST the raw device key
+                                                const fileContent = deviceKey; // Just the key, no headers
+                                                
+                                                // Download the file
+                                                const blob = new Blob([fileContent], { type: 'text/plain' });
+                                                const url = window.URL.createObjectURL(blob);
+                                                const a = document.createElement('a');
+                                                a.href = url;
+                                                a.download = fileName;
+                                                document.body.appendChild(a);
+                                                a.click();
+                                                document.body.removeChild(a);
+                                                window.URL.revokeObjectURL(url);
+                                                
+                                                logger.log('✅ VPN device key downloaded:', fileName);
+                                                alert(`✅ Downloaded: ${fileName}\n\n✅ Device key ready!\n\nNext steps:\n1. Install Tailscale (links below)\n2. Run the VPN command shown in Step 3`);
+                                                
+                                              } catch (error) {
+                                                logger.error('❌ Failed to download VPN certificate:', error);
+                                                alert('❌ Download failed. Please refresh the page or contact support.');
+                                              }
+                                            }}
+                                            className="w-full bg-indigo-600 text-white px-4 py-3 rounded-lg hover:bg-indigo-700 font-semibold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                                          >
+                                            📥 Download headscale_{user?.user_id || 'user'}.pem
+                                          </button>
+                                          <div className="text-xs text-gray-600 mt-2 bg-blue-50 p-2 rounded">
+                                            💡 <strong>Save this file</strong> - You'll need it for the VPN connection command
+                                          </div>
+                                        </div>
+                                        
+                                        {/* Step 2: Install Tailscale */}
+                                        <div className="bg-white rounded-lg p-4 border-2 border-indigo-300 shadow-sm">
+                                          <div className="flex items-center gap-2 mb-3">
+                                            <span className="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">2</span>
+                                            <div className="font-bold text-gray-800">Install Tailscale VPN Client</div>
+                                          </div>
+                                          
+                                          {/* Windows Instructions */}
+                                          <div className="mb-3 bg-blue-50 rounded p-3 border border-blue-200">
+                                            <div className="font-semibold text-sm text-blue-900 mb-2">🪟 Windows Users:</div>
+                                            <ol className="text-xs space-y-1 pl-4 list-decimal text-gray-700">
+                                              <li>Click <a href="https://tailscale.com/download/windows" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-semibold">Download Installer</a> to get TailscaleSetup.exe</li>
+                                              <li>Locate downloaded file (usually in Downloads folder)</li>
+                                              <li>Double-click TailscaleSetup.exe</li>
+                                              <li>Click "Yes" when Windows asks for administrator permission</li>
+                                              <li>Follow installation wizard (Next → Next → Install)</li>
+                                              <li>After install, Tailscale icon appears in system tray (bottom-right corner)</li>
+                                            </ol>
+                                            <div className="text-xs text-blue-800 mt-2">✅ <strong>Success:</strong> Tailscale icon visible in system tray</div>
+                                          </div>
+                                          
+                                          {/* Mac Instructions */}
+                                          <div className="mb-3 bg-purple-50 rounded p-3 border border-purple-200">
+                                            <div className="font-semibold text-sm text-purple-900 mb-2">🍎 Mac Users:</div>
+                                            <ol className="text-xs space-y-1 pl-4 list-decimal text-gray-700">
+                                              <li>Click <a href="https://tailscale.com/download/mac" target="_blank" rel="noopener noreferrer" className="text-blue-600 underline font-semibold">Download Installer</a> to get Tailscale.pkg</li>
+                                              <li>Open the downloaded .pkg file</li>
+                                              <li>Follow installation prompts</li>
+                                              <li>Enter your Mac password when prompted</li>
+                                              <li>After install, Tailscale icon appears in menu bar (top-right)</li>
+                                            </ol>
+                                            <div className="text-xs text-purple-800 mt-2">✅ <strong>Success:</strong> Tailscale icon visible in menu bar</div>
+                                          </div>
+                                          
+                                          {/* Linux Instructions */}
+                                          <div className="bg-green-50 rounded p-3 border border-green-200">
+                                            <div className="font-semibold text-sm text-green-900 mb-2">🐧 Linux Users:</div>
+                                            <ol className="text-xs space-y-1 pl-4 list-decimal text-gray-700">
+                                              <li>Open Terminal application</li>
+                                              <li>Copy and paste this command:</li>
+                                            </ol>
+                                            <code className="bg-gray-900 text-green-400 px-3 py-2 rounded text-xs block mt-2 font-mono">curl -fsSL https://tailscale.com/install.sh | sh</code>
+                                            <ol start={3} className="text-xs space-y-1 pl-4 list-decimal text-gray-700 mt-2">
+                                              <li>Press Enter and wait for installation to complete</li>
+                                              <li>You may need to enter your sudo password</li>
+                                            </ol>
+                                            <div className="text-xs text-green-800 mt-2">✅ <strong>Success:</strong> Command completes with "Tailscale installed successfully"</div>
+                                          </div>
+                                        </div>
+                                        
+                                        {/* Step 3: Connect Command */}
+                                        <div className="bg-white rounded-lg p-4 border-2 border-indigo-300 shadow-sm">
+                                          <div className="flex items-center gap-2 mb-3">
+                                            <span className="bg-indigo-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold">3</span>
+                                            <div className="font-bold text-gray-800">Connect Your Device to Lab VPN</div>
+                                          </div>
+                                          
+                                          <div className="bg-yellow-50 border border-yellow-300 rounded p-3 mb-3">
+                                            <div className="text-xs text-yellow-900">
+                                              <strong>⚠️ Prerequisites:</strong> Tailscale installed ✅ | Certificate downloaded ✅
+                                            </div>
+                                          </div>
+                                          
+                                          {/* Windows/Mac Instructions */}
+                                          <div className="mb-3 bg-blue-50 rounded p-3 border border-blue-200">
+                                            <div className="font-semibold text-sm text-blue-900 mb-2">🪟 Windows / 🍎 Mac Users:</div>
+                                            <ol className="text-xs space-y-2 pl-4 list-decimal text-gray-700">
+                                              <li>
+                                                <strong>Open Command Line:</strong>
+                                                <div className="ml-2 mt-1">
+                                                  • Windows: Press <kbd className="bg-gray-200 px-1 rounded">Win+R</kbd>, type <code className="bg-gray-200 px-1">powershell</code>, press Enter<br/>
+                                                  • Mac: Press <kbd className="bg-gray-200 px-1">Cmd+Space</kbd>, type <code className="bg-gray-200 px-1">terminal</code>, press Enter
+                                                </div>
+                                              </li>
+                                              <li>
+                                                <strong>Navigate to downloads folder:</strong>
+                                                <code className="bg-gray-900 text-green-400 px-2 py-1 rounded text-xs block mt-1">cd Downloads</code>
+                                                <div className="text-gray-600 mt-1">Or wherever you saved the .pem file</div>
+                                              </li>
+                                              <li>
+                                                <strong>Copy and paste this EXACT command:</strong>
+                                                <div className="bg-gray-900 text-green-400 rounded-lg p-2 mt-1 relative">
+                                                  <button 
+                                                    onClick={() => {
+                                                      const cmd = (userLab as any).vpnInfo?.vpn_command || `tailscale up --authkey=file:headscale_${user?.user_id || 'user'}.pem --login-server=https://vpn.cystar.io`;
+                                                      navigator.clipboard.writeText(cmd);
+                                                      alert('✅ Command copied to clipboard!');
+                                                    }}
+                                                    className="absolute top-2 right-2 text-xs px-2 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                                                  >
+                                                    📋 Copy
+                                                  </button>
+                                                  <code className="text-xs font-mono block break-all pr-16">
+                                                    {(userLab as any).vpnInfo?.vpn_command || `tailscale up --authkey=file:headscale_${user?.user_id || 'user'}.pem --login-server=https://vpn.cystar.io`}
+                                                  </code>
+                                                </div>
+                                              </li>
+                                              <li><strong>Press Enter</strong> and wait 5-10 seconds</li>
+                                              <li>
+                                                <strong>Look for success message:</strong>
+                                                <div className="bg-green-100 border border-green-300 rounded p-2 mt-1 text-green-800">
+                                                  ✅ "Success" or "Connected" or "Authenticated"
+                                                </div>
+                                              </li>
+                                            </ol>
+                                          </div>
+                                          
+                                          {/* Linux Instructions */}
+                                          <div className="mb-3 bg-green-50 rounded p-3 border border-green-200">
+                                            <div className="font-semibold text-sm text-green-900 mb-2">🐧 Linux Users:</div>
+                                            <ol className="text-xs space-y-2 pl-4 list-decimal text-gray-700">
+                                              <li>Open Terminal (Ctrl+Alt+T)</li>
+                                              <li>Navigate to downloads: <code className="bg-gray-200 px-1">cd ~/Downloads</code></li>
+                                              <li>Run the command shown above (same as Windows/Mac)</li>
+                                            </ol>
+                                          </div>
+                                          
+                                          {/* Verification */}
+                                          <div className="bg-indigo-50 rounded p-3 border border-indigo-200">
+                                            <div className="font-semibold text-sm text-indigo-900 mb-2">🔍 Verify Connection:</div>
+                                            <div className="text-xs space-y-2 text-gray-700">
+                                              <div>Run this command to check status:</div>
+                                              <code className="bg-gray-900 text-green-400 px-2 py-1 rounded block">tailscale status</code>
+                                              <div className="bg-white border rounded p-2 mt-1">
+                                                <strong>Expected output:</strong>
+                                                <div className="font-mono text-xs mt-1 text-gray-600">
+                                                  • Status: Connected<br/>
+                                                  • Online devices listed<br/>
+                                                  • subnet_router should be visible
+                                                </div>
+                                              </div>
+                                            </div>
+                                          </div>
+                                          
+                                          {/* Troubleshooting */}
+                                          <div className="mt-3 bg-red-50 rounded p-3 border border-red-200">
+                                            <div className="font-semibold text-sm text-red-900 mb-2">❓ Troubleshooting:</div>
+                                            <div className="text-xs space-y-1 text-gray-700">
+                                              <div><strong>"Command not found":</strong> Make sure you're in the folder containing the .pem file</div>
+                                              <div><strong>"Permission denied":</strong> Run PowerShell/Terminal as Administrator</div>
+                                              <div><strong>"Invalid key":</strong> Re-download the certificate and try again</div>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Connection Guide (Feature 4) - Step 2: Access VMs */}
+                                  {(userLab as any).deploymentStatus === 'active' && (userLab as any).vmInstances.length > 0 && (
+                                    <div className="mt-4 bg-gradient-to-r from-blue-50 to-cyan-50 border-2 border-blue-400 rounded-lg p-5 shadow-md">
+                                      <div className="flex items-center gap-2 mb-4">
+                                        <span className="text-2xl">📖</span>
+                                        <div className="font-bold text-blue-900 text-lg">Step 2: Connect to Lab VMs</div>
+                                      </div>
+                                      
+                                      <div className="bg-blue-100 border border-blue-300 rounded-lg p-3 mb-4">
+                                        <div className="text-sm text-blue-900">
+                                          <strong>✅ VPN Connected?</strong> Before proceeding, ensure you completed Step 1 (VPN Setup) above. The VMs below are only accessible through the VPN network.
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="space-y-3 text-sm">
+                                        <div className="bg-white rounded-lg p-3 border border-blue-200">
+                                          <div className="font-semibold text-gray-800 mb-2">🎯 Quick Start Guide:</div>
+                                          <ol className="space-y-2 pl-4 text-xs">
+                                            <li className="flex gap-2">
+                                              <span className="font-bold text-blue-600 min-w-[20px]">1.</span>
+                                              <div>
+                                                <strong>Verify VPN Connection:</strong>
+                                                <div className="text-gray-600 mt-1">
+                                                  Open command line and run: <code className="bg-gray-100 px-1">tailscale status</code><br/>
+                                                  Confirm you see "Connected" and subnet_router listed
+                                                </div>
+                                              </div>
+                                            </li>
+                                            <li className="flex gap-2">
+                                              <span className="font-bold text-blue-600 min-w-[20px]">2.</span>
+                                              <div>
+                                                <strong>Start with Domain Controller:</strong>
+                                                <div className="text-gray-600 mt-1">
+                                                  Connect to <code className="bg-gray-100 px-1 font-mono">10.20.1.10</code> first - this is your main Active Directory server
+                                                </div>
+                                              </div>
+                                            </li>
+                                            <li className="flex gap-2">
+                                              <span className="font-bold text-blue-600 min-w-[20px]">3.</span>
+                                              <div>
+                                                <strong>Use RDP Connection Instructions:</strong>
+                                                <div className="text-gray-600 mt-1">
+                                                  Each VM card below has OS-specific instructions (Windows/Mac/Linux)<br/>
+                                                  Click the copy button for your OS and follow the steps
+                                                </div>
+                                              </div>
+                                            </li>
+                                            <li className="flex gap-2">
+                                              <span className="font-bold text-blue-600 min-w-[20px]">4.</span>
+                                              <div>
+                                                <strong>Login Credentials:</strong>
+                                                <div className="text-gray-600 mt-1">
+                                                  Username and password shown in each VM card<br/>
+                                                  Click 👁️ Show to reveal passwords, 📋 Copy to copy values
+                                                </div>
+                                              </div>
+                                            </li>
+                                          </ol>
+                                        </div>
+                                        
+                                        <div className="bg-white rounded-lg p-3 border border-blue-200">
+                                          <div className="font-semibold text-gray-800 mb-2">🔍 Lab Architecture:</div>
+                                          <div className="space-y-1 text-xs">
+                                            <div className="flex items-center gap-2 bg-purple-50 p-2 rounded">
+                                              <span className="font-bold">🖥️ Domain Controller (10.20.1.10):</span>
+                                              <span>Active Directory server - main control point</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 bg-green-50 p-2 rounded">
+                                              <span className="font-bold">👤 Domain Client (10.20.1.20):</span>
+                                              <span>User workstation joined to domain</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 bg-blue-50 p-2 rounded">
+                                              <span className="font-bold">🛡️ Wazuh Manager (10.20.1.30):</span>
+                                              <span>Security monitoring dashboard</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 bg-gray-50 p-2 rounded">
+                                              <span className="font-bold">🌐 Subnet Router (10.20.1.234):</span>
+                                              <span>VPN gateway (automatic - no login needed)</span>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                      
+                                      <div className="mt-3 pt-3 border-t border-blue-200">
+                                        <div className="text-xs text-blue-800 space-y-1">
+                                          <div>⏱️ <strong>Connection Time:</strong> RDP connections may take 30-60 seconds to establish on first attempt</div>
+                                          <div>🔒 <strong>Security Note:</strong> All IPs are private (10.20.1.x) and only accessible via VPN</div>
+                                          <div>❓ <strong>Troubleshooting:</strong> If you can't connect, verify VPN is running with <code className="bg-gray-200 px-1">tailscale status</code></div>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  )}
+
+                                  {/* Show All VM Instances (AD Lab) - AFTER VPN Setup and Connection Guide */}
+                                  {(userLab as any).vmInstances && (userLab as any).vmInstances.length > 0 ? (
+                                    <div className="space-y-3 mt-4">
+                                      <div className="text-sm font-semibold text-green-800">🖥️ Lab Virtual Machines ({(userLab as any).vmInstances.length})</div>
+                                      {(userLab as any).vmInstances.map((vm: any, idx: number) => (
+                                        <VMCard key={idx} vm={vm} idx={idx} />
+                                      ))}
+                                    </div>
+                                  ) : null}
+
+                                  {/* Legacy single VM display - DISABLED */}
+                                </div>
+                              )}
+                            </div>
+                          )}
+
+                          {/* VM Credentials Section */}
+                          {(userLab as any).credentials && (
+                            <div className="mb-3 p-3 bg-blue-50 rounded-lg">
+                              <div className="text-sm font-medium text-blue-800 mb-2">VM Access Credentials</div>
+                              <div className="space-y-2 text-sm">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-blue-700">IP Address:</span>
+                                  <code className="bg-blue-100 px-2 py-1 rounded text-blue-800 font-mono">
+                                    {(userLab as any).credentials.ipAddress}
+                                  </code>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-blue-700">Username:</span>
+                                  <code className="bg-blue-100 px-2 py-1 rounded text-blue-800 font-mono">
+                                    {(userLab as any).credentials.username}
+                                  </code>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-blue-700">Password:</span>
+                                  <code className="bg-blue-100 px-2 py-1 rounded text-blue-800 font-mono">
+                                    {(userLab as any).credentials.password}
+                                  </code>
+                                </div>
+                                <div className="mt-2 p-2 bg-blue-100 rounded text-xs text-blue-700">
+                                  <strong>Note:</strong> Use these credentials to access your lab VM. Keep them secure and don't share with others.
+                                </div>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Lab Information Section */}
+                          {(userLab as any).vmIpAddress && (
+                            <div className="mb-3 p-3 bg-green-50 rounded-lg">
+                              <div className="text-sm font-medium text-green-800 mb-2">Lab Access Information</div>
+                              <div className="space-y-1 text-sm">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-green-700">VM IP Address:</span>
+                                  <code className="bg-green-100 px-2 py-1 rounded text-green-800">
+                                    {(userLab as any).vmIpAddress}
+                                  </code>
+                                </div>
+                                {(userLab as any).certificate?.generated && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-green-700">Certificate:</span>
+                                    <div className="flex items-center space-x-2">
+                                      <Button size="sm" variant="outline" className="text-xs">
+                                        Download
+                                      </Button>
+                                      <Button size="sm" variant="outline" className="text-xs">
+                                        Regenerate
+                                      </Button>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Lab Resources Section */}
+                          {(userLab as any).resources && (
+                            ((userLab as any).resources.videos?.length > 0 || 
+                             (userLab as any).resources.pdfs?.length > 0 || 
+                             (userLab as any).resources.documents?.length > 0) && (
+                              <div className="mb-3 p-3 bg-green-50 rounded-lg">
+                                <div className="text-sm font-medium text-green-800 mb-2">Lab Resources</div>
+                                <div className="space-y-1 text-sm">
+                                  {(userLab as any).resources.videos?.length > 0 && (
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-green-700">Videos:</span>
+                                      <span className="text-green-600">{(userLab as any).resources.videos.length} available</span>
+                                    </div>
+                                  )}
+                                  {(userLab as any).resources.pdfs?.length > 0 && (
+                                    <div className="flex items-center justify-between">
+                                      <span className="text-green-700">PDFs:</span>
+                                      <span className="text-green-600">{(userLab as any).resources.pdfs.length} available</span>
+                                    </div>
+                                  )}
+                                  <Button size="sm" variant="outline" className="text-xs w-full">
+                                    View All Resources
+                                  </Button>
+                                </div>
+                              </div>
+                            )
+                          )}
+
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-4 text-sm">
+                              {userLab.quizScore !== null && (
+                                <span className="flex items-center text-green-600">
+                                  <Star className="w-4 h-4 mr-1" />
+                                  Quiz Score: {userLab.quizScore}%
+                                </span>
+                              )}
+                              {userLab.isCompleted && userLab.completedAt && (
+                                <span className="flex items-center text-green-600">
+                                  <Trophy className="w-4 h-4 mr-1" />
+                                  Completed: {new Date(userLab.completedAt).toLocaleDateString()}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+        </div>
+      </div>
+
+      {/* User Credentials Modal */}
+      <UserCredentialsModal
+        isOpen={isCredentialsModalOpen}
+        onClose={() => setIsCredentialsModalOpen(false)}
+        userId={user._id}
+      />
+    </div>
+  )
+}
