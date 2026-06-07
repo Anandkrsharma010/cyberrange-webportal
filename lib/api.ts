@@ -6,17 +6,16 @@ const getApiBaseUrl = () => {
     return process.env.NEXT_PUBLIC_API_URL;
   }
   if (typeof window !== 'undefined') {
-    // Client-side: use the same host as the frontend
     const hostname = window.location.hostname;
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
       return 'http://localhost:8000';
     } else {
-      // Mobile/network access: use the same IP as frontend, FastAPI default port
-      return `http://${hostname}:8000`;
+      // Fallback to the production Render backend for any deployed site
+      return 'https://cyberrange-api-l294.onrender.com';
     }
   }
-  // Server-side: default to localhost
-  return 'http://localhost:8000';
+  // Server-side default to production Render URL
+  return 'https://cyberrange-api-l294.onrender.com';
 };
 
 const API_BASE_URL = getApiBaseUrl();
