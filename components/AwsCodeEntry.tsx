@@ -286,7 +286,8 @@ export default function AwsCodeEntry({ labId, userEmail, className = '' }: AwsCo
               onClick={() => {
                 const token = localStorage.getItem('cystar_token') || '';
                 const purchaseId = status?.purchaseId || '';
-                window.location.href = `http://localhost:3000/?token=${encodeURIComponent(token)}&userId=${encodeURIComponent(userEmail)}&purchaseId=${encodeURIComponent(purchaseId)}`;
+                const awsLabBaseUrl = process.env.NEXT_PUBLIC_AWS_LAB_URL || 'http://localhost:3000';
+                window.location.href = `${awsLabBaseUrl}/?token=${encodeURIComponent(token)}&userId=${encodeURIComponent(userEmail)}&purchaseId=${encodeURIComponent(purchaseId)}`;
               }}
             >
               <ExternalLink className="w-5 h-5 mr-2" />
