@@ -286,7 +286,7 @@ export default function AwsCodeEntry({ labId, userEmail, className = '' }: AwsCo
               onClick={() => {
                 const token = localStorage.getItem('cystar_token') || '';
                 const purchaseId = status?.purchaseId || '';
-                const awsLabBaseUrl = process.env.NEXT_PUBLIC_AWS_LAB_URL || 'http://localhost:3000';
+                const awsLabBaseUrl = process.env.NEXT_PUBLIC_AWS_LAB_URL || 'https://awscloudlabs-main.vercel.app';
                 window.location.href = `${awsLabBaseUrl}/?token=${encodeURIComponent(token)}&userId=${encodeURIComponent(userEmail)}&purchaseId=${encodeURIComponent(purchaseId)}`;
               }}
             >
