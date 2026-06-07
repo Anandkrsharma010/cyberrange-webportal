@@ -2,6 +2,9 @@
 import { logger } from './logger'
 
 const getApiBaseUrl = () => {
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL;
+  }
   if (typeof window !== 'undefined') {
     // Client-side: use the same host as the frontend
     const hostname = window.location.hostname;
@@ -13,7 +16,7 @@ const getApiBaseUrl = () => {
     }
   }
   // Server-side: default to localhost
-  return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  return 'http://localhost:8000';
 };
 
 const API_BASE_URL = getApiBaseUrl();
