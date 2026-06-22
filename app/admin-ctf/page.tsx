@@ -368,7 +368,7 @@ export default function StandaloneAdminCTFControl() {
 
   return (
     <div className="min-h-screen bg-[#070709] text-slate-100 flex flex-col font-sans">
-      <Header />
+      <Header active="admin-ctf" />
       
       {/* Standalone Alert Banner */}
       <div className="bg-amber-500/10 border-b border-amber-500/20 py-2.5 px-6">

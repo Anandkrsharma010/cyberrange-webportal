@@ -20,13 +20,12 @@ import {
   ShieldCheck,
   LogOut,
   User,
-  Trophy,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getAdminEntry, getRoleHome } from "@/lib/role-home"
 
 type HeaderProps = {
-  active?: "home" | "labs" | "dashboard" | "ctf"
+  active?: "home" | "labs" | "dashboard"
 }
 
 export default function Header({ active }: HeaderProps) {
@@ -43,7 +42,6 @@ export default function Header({ active }: HeaderProps) {
   const navLinks = [
     { href: "/", label: "Home", icon: Home, key: "home" as const },
     { href: "/labs", label: "Labs", icon: BookOpenCheck, key: "labs" as const },
-    { href: "/ctf", label: "CTF Arena", icon: Trophy, key: "ctf" as const },
     ...(isAuthenticated
       ? [
           {
