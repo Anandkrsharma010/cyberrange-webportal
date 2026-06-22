@@ -35,7 +35,7 @@ import {
 } from '@/components/ui/table'
 import { useAuth } from '@/lib/auth'
 import { api, apiClient, type CourseResource, type DeploymentAccessDetails, type Entitlement } from '@/lib/api'
-import { toLab, type Lab } from '@/lib/labs'
+import { toLab, labUrlId, type Lab } from '@/lib/labs'
 import { contentIdsEqual } from '@/lib/content-id'
 import logger from '@/lib/logger'
 
@@ -579,14 +579,31 @@ export default function DashboardPage() {
                           <TableCell className="py-3.5 text-xs text-slate-300">{formatDate(dep.expires_at)}</TableCell>
                           <TableCell className="py-3.5 text-right">
                             {status === 'running' ? (
-                              <Button
-                                size="sm"
-                                onClick={() => handleOpenAccessDetails(dep.deployment_id)}
-                                disabled={!canJoin}
-                                className="h-8 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 rounded-lg shadow-md transition-all text-xs"
-                              >
-                                {expanded ? 'Hide Guide' : 'Open Guide'}
-                              </Button>
+                              <div className="flex justify-end gap-2">
+                                <Button
+                                  size="sm"
+                                  onClick={() => handleOpenAccessDetails(dep.deployment_id)}
+                                  disabled={!canJoin}
+                                  className="h-8 bg-white/10 hover:bg-white/20 text-white font-bold px-4 rounded-lg shadow-md transition-all text-xs"
+                                >
+                                  {expanded ? 'Hide Guide' : 'Open Guide'}
+                                </Button>
+                                <Button
+                                  asChild
+                                  size="sm"
+                                  className="h-8 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-4 rounded-lg shadow-md transition-all text-xs"
+                                >
+                                  <Link href={`/quiz/${(() => {
+                                    const key = displayLabTitle(dep.lab_title || '').toLowerCase().trim();
+                                    const match = catalog.find(
+                                      (l) => displayLabTitle(l.title).toLowerCase().trim() === key || l.title.toLowerCase().trim() === key
+                                    );
+                                    return match ? labUrlId(match) : dep.lab_title || '';
+                                  })()}`}>
+                                    Access CTF
+                                  </Link>
+                                </Button>
+                              </div>
                             ) : status === 'queued' || status === 'provisioning' || status === 'terminating' ? (
                               <div className="flex justify-end gap-2">
                                 <Button size="sm" disabled className="h-8 text-xs font-semibold rounded-lg bg-white/5 border border-white/10 text-slate-400">Preparing...</Button>

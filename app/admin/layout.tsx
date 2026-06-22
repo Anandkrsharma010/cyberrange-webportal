@@ -18,6 +18,7 @@ import {
   BellRing,
   LogOut,
   Loader2,
+  Trophy,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getRoleHome } from "@/lib/role-home"
@@ -34,6 +35,7 @@ const NAV = [
   { href: "/admin/guardrails", label: "Guardrails", icon: ShieldCheck },
   { href: "/admin/participants", label: "Participants", icon: Users2 },
   { href: "/admin/deployments", label: "Lab deployments", icon: Server },
+  { href: "/admin/ctf", label: "CTF Challenges", icon: Trophy },
   { href: "/admin/billing", label: "Billing Snapshot", icon: CreditCard },
   { href: "/admin/billing/payments", label: "Billing Payments", icon: CreditCard },
 ] as const
